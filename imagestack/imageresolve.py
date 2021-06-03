@@ -1,6 +1,4 @@
-from . import ImageStack
-from .layers import *
-from .colors import *
+from . import *
 import copy
 import ast
 

@@ -1,6 +1,4 @@
-from .variables import *
-from .colors import *
-
+from . import *
 import requests
 import cv2
 import numpy as np

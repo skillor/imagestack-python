@@ -1,5 +1,5 @@
+from . import *
 import numpy as np
-from .variables import VariableInterface
 
 
 class ColorInterface:

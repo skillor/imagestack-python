@@ -1,5 +1,5 @@
+from . import *
 import warnings
-from .colors import SingleColor
 
 
 class VariableInterface:

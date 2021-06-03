@@ -1,6 +1,5 @@
+from . import *
 from .visitor import Visitor
-from .helpers import ALPHA_COLOR, LINE_TYPE, from_char, point_on_circle, rotate_image, invert_image
-
 import numpy as np
 import cv2
 import os

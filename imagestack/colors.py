@@ -1,13 +1,12 @@
-from . import *
 import numpy as np
 
 
 class ColorInterface:
     @staticmethod
     def validated(color):
-        if issubclass(type(color), VariableInterface) or issubclass(type(color), ColorInterface):
-            return color
-        return SingleColor(color)
+        if isinstance(color, tuple) or isinstance(color, list):
+            return SingleColor(color)
+        return color
 
     def create(self, size):
         raise Exception('Raw usage of ColorInterface forbidden!')

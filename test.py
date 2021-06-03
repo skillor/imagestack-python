@@ -129,12 +129,6 @@ class TestStringMethods(unittest.TestCase):
         color=(55, 50, 48),
     ),
 
-    WebImageLayer(
-        pos=(15, 15),
-        resize=(120, 120),
-        url='https://images-na.ssl-images-amazon.com/images/I/51BxVpiBaVL.jpg'
-    ),
-
     RectangleLayer(
         pos=(15, 15),
         size=(120, 120),

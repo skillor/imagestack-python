@@ -1,4 +1,10 @@
 class Visitor:
+    def visit_ImageStack(self, el):
+        pass
+
+    def visit_AnimatedImageStack(self, el):
+        pass
+
     def visit_AlignLayer(self, el):
         pass
 

@@ -12,6 +12,59 @@ class VisitorCreate(Visitor):
     def __init__(self, image_creator):
         self.image_creator = image_creator
 
+    def visit_ImageStack(self, el):
+        img = None
+        for layer in el.layers:
+            fg = layer.accept(self)
+
+            img = overlay(img, fg, layer.pos[0], layer.pos[1], layer.max_size, layer.align_x, layer.align_y)
+        return img
+
+    def visit_AnimatedImageStack(self, el):
+        rimage = el.rotate.accept(self)
+        rimage = cv2.cvtColor(rimage, cv2.COLOR_RGBA2BGRA)
+
+        fgimage = None
+        if el.static_fg is not False:
+            fgimage = el.static_fg.accept(self)
+            fgimage = cv2.cvtColor(fgimage, cv2.COLOR_RGBA2BGRA)
+
+        bgimage = None
+        if el.static_bg is not False:
+            bgimage = el.static_bg.accept(self)
+            bgimage = cv2.cvtColor(bgimage, cv2.COLOR_RGBA2BGRA)
+
+        def normalize_angle(a):
+            a = int(a)
+            while a < 0:
+                a += 360
+            while a >= 360:
+                a -= 360
+            return a
+
+        buffered_images = {}
+
+        image_data = []
+        for i in np.arange(0, 1, 1 / (el.fps * el.seconds)):
+            angle = normalize_angle(el.rotation_func(i))
+            hit = None
+            if len(buffered_images) > 0:
+                hit = min(buffered_images.keys(), key=lambda x: abs(x - angle))
+            if hit is not None and abs(angle - hit) <= 1:
+                image_data.append(buffered_images[hit])
+            else:
+                t = rotate_image(rimage, angle, bg_color=el.bg_color)
+                t = overlay(bgimage, t)
+                t = overlay(t, fgimage)
+
+                t = Image.fromarray(t)
+
+                buffered_images[angle] = t
+
+                image_data.append(t)
+
+        return image_data
+
     def visit_AlignLayer(self, el):
         raise Exception('Raw usage of AlignLayer.create is forbidden!')
 

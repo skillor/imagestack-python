@@ -3,9 +3,13 @@ from .visitor_create import VisitorCreate
 from .visitor_html import VisitorHtml
 import base64
 import io
+import cv2
 
 
 class ImageStack(Createable, VariableKwargManager):
+    def accept(self, visitor):
+        return visitor.visit_ImageStack(self)
+
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         if len(args) > 1:
@@ -15,28 +19,23 @@ class ImageStack(Createable, VariableKwargManager):
 
     def _init(self):
         self.layers = self.get_kwarg('layers', [])
+        if len(self.layers) == 0:
+            self.layers = [EmptyLayer()]
+
         for layer in self.layers:
             layer._init()
         super()._init_finished()
 
-    async def create(self, image_creator, max_size):
-        img = None
-        layers = self.layers
-        if len(layers) == 0:
-            layers = [EmptyLayer()]
-
+    async def create(self, image_creator, max_size=None):
         v = VisitorCreate(image_creator)
-
-        for layer in layers:
-            fg = layer.accept(v)
-
-            img = overlay(img, fg, layer.pos[0], layer.pos[1], layer.max_size, layer.align_x, layer.align_y)
+        img = self.accept(v)
 
         resize_factor = 1
-        if 0 < max_size[0] < img.shape[1]:
-            resize_factor = max_size[0] / img.shape[1]
-        if 0 < max_size[1] < img.shape[0]:
-            resize_factor = min(resize_factor, max_size[1] / img.shape[0])
+        if max_size is not None:
+            if 0 < max_size[0] < img.shape[1]:
+                resize_factor = max_size[0] / img.shape[1]
+            if 0 < max_size[1] < img.shape[0]:
+                resize_factor = min(resize_factor, max_size[1] / img.shape[0])
 
         if resize_factor < 1:
             img = cv2.resize(img, (int(img.shape[1] * resize_factor), int(img.shape[0] * resize_factor)))
@@ -69,6 +68,9 @@ class ImageStack(Createable, VariableKwargManager):
 
 
 class AnimatedImageStack(Createable, VariableKwargManager):
+    def accept(self, visitor):
+        return visitor.visit_AnimatedImageStack(self)
+
     def _init(self):
         self.rotate = self.get_kwarg('rotate')
         self.static_fg = self.get_kwarg('static_fg', False)
@@ -81,48 +83,13 @@ class AnimatedImageStack(Createable, VariableKwargManager):
         if len(self.bg_color) == 3:
             self.bg_color = self.bg_color[0], self.bg_color[1], self.bg_color[2], 255
 
-    async def create(self, image_creator, **kwargs):
-        rimage = await self.rotate.raw_create(image_creator, **kwargs)
-        rimage = cv2.cvtColor(rimage, cv2.COLOR_RGBA2BGRA)
+    async def create(self, image_creator):
+        v = VisitorCreate(image_creator)
+        image_data = self.accept(v)
+        return image_data
 
-        fgimage = None
-        if self.static_fg is not False:
-            fgimage = await self.static_fg.raw_create(image_creator, **kwargs)
-            fgimage = cv2.cvtColor(fgimage, cv2.COLOR_RGBA2BGRA)
-
-        bgimage = None
-        if self.static_bg is not False:
-            bgimage = await self.static_bg.raw_create(image_creator, **kwargs)
-            bgimage = cv2.cvtColor(bgimage, cv2.COLOR_RGBA2BGRA)
-
-        def normalize_angle(a):
-            a = int(a)
-            while a < 0:
-                a += 360
-            while a >= 360:
-                a -= 360
-            return a
-
-        buffered_images = {}
-
-        image_data = []
-        for i in np.arange(0, 1, 1 / (self.fps * self.seconds)):
-            angle = normalize_angle(self.rotation_func(i))
-            hit = None
-            if len(buffered_images) > 0:
-                hit = min(buffered_images.keys(), key=lambda x: abs(x - angle))
-            if hit is not None and abs(angle - hit) <= 1:
-                image_data.append(buffered_images[hit])
-            else:
-                t = rotate_image(rimage, angle, bg_color=self.bg_color)
-                t = overlay(bgimage, t)
-                t = overlay(t, fgimage)
-
-                t = Image.fromarray(t)
-
-                buffered_images[angle] = t
-
-                image_data.append(t)
+    async def create_bytes(self, image_creator):
+        image_data = await self.create(image_creator)
 
         gif_image_bytes = io.BytesIO()
 

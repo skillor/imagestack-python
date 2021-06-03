@@ -2,6 +2,12 @@ class VisitorHtml:
     def __init__(self, image_creator):
         self.image_creator = image_creator
 
+    def visit_ImageStack(self, el):
+        return '<style>{}</style><div>{}</div>'.format(el.style_html(self.image_creator), el.layers_html(self))
+
+    def visit_AnimatedImageStack(self, el):
+        return '<div data-layer="AnimatedImageStack">AnimatedImageStack not yet supported</div>'
+
     def visit_AlignLayer(self, el):
         return '<div data-layer="AlignLayer" style="{}"></div>'.format(el.html_style())
 
@@ -49,27 +55,6 @@ class VisitorHtml:
         def _create_svg_points():
             half_line_width = int(el.line_width / 2)
             radius = abs(el.radius)
-            # return ['M{},{}'.format(half_line_width + radius, half_line_width),
-            #         'L{},{}'.format(el.size[0] - half_line_width - radius, half_line_width),
-            #         'Q{},{} {},{}'.format(el.size[0] - half_line_width,
-            #                               half_line_width,
-            #                               el.size[0] - half_line_width,
-            #                               half_line_width + radius),
-            #         'L{},{}'.format(el.size[0] - half_line_width, el.size[1] - half_line_width - radius),
-            #         'Q{},{} {},{}'.format(el.size[0] - half_line_width,
-            #                               el.size[1] - half_line_width,
-            #                               el.size[0] - half_line_width - radius,
-            #                               el.size[1] - half_line_width),
-            #         'L{},{}'.format(half_line_width + radius, el.size[1] - half_line_width),
-            #         'Q{},{} {},{}'.format(half_line_width,
-            #                               el.size[1] - half_line_width,
-            #                               half_line_width,
-            #                               el.size[1] - half_line_width - radius),
-            #         'L{},{}'.format(half_line_width, half_line_width + radius),
-            #         'Q{},{} {},{}'.format(half_line_width,
-            #                               half_line_width,
-            #                               half_line_width + radius,
-            #                               half_line_width)]
             return ['M{},{}'.format(half_line_width + radius, half_line_width),
                     'L{},{}'.format(el.size[0] - half_line_width - radius, half_line_width),
                     'A{},{} 0 0 1 {},{}'.format(radius,

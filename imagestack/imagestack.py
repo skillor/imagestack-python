@@ -1,9 +1,10 @@
 from . import *
 from .visitor_create import VisitorCreate
 from .visitor_html import VisitorHtml
-import base64
 import io
 import cv2
+import base64
+
 
 
 class ImageStack(Createable, VariableKwargManager):
@@ -47,7 +48,7 @@ class ImageStack(Createable, VariableKwargManager):
         is_success, buffer = cv2.imencode('.png', img)
         return io.BytesIO(buffer)
 
-    def create_html(self, image_creator):
+    def style_html(self, image_creator):
         style_html = []
         for key, font_path in image_creator.font_loader.registered_fonts.items():
             with open(font_path, "rb") as font_file:
@@ -57,14 +58,17 @@ class ImageStack(Createable, VariableKwargManager):
                               'src:url(data:application/x-font-woff;charset=utf-8;base64,{}) format(\'woff\');'
                               '}}'
                               .format(key, base64_font))
+        return ''.join(style_html)
 
+    def layers_html(self, visitor):
         layers_html = []
-
-        v = VisitorHtml(image_creator)
-
         for layer in self.layers:
-            layers_html.append(layer.accept(v))
-        return '<style>{}</style><div>{}</div>'.format(''.join(style_html), ''.join(layers_html))
+            layers_html.append(layer.accept(visitor))
+        return ''.join(layers_html)
+
+    def create_html(self, image_creator):
+        v = VisitorHtml(image_creator)
+        return self.accept(v)
 
 
 class AnimatedImageStack(Createable, VariableKwargManager):

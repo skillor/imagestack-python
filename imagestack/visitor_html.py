@@ -1,9 +1,27 @@
+import base64
+
+
 class VisitorHtml:
     def __init__(self, image_creator):
         self.image_creator = image_creator
 
+    def style_html(self):
+        style_html = []
+        for key, font_path in self.image_creator.font_loader.registered_fonts.items():
+            with open(font_path, "rb") as font_file:
+                base64_font = base64.b64encode(font_file.read()).decode('ascii')
+            style_html.append('@font-face {{'
+                              'font-family:\'{}\';'
+                              'src:url(data:application/x-font-woff;charset=utf-8;base64,{}) format(\'woff\');'
+                              '}}'
+                              .format(key, base64_font))
+        return ''.join(style_html)
+
     def visit_ImageStack(self, el):
-        return '<style>{}</style><div>{}</div>'.format(el.style_html(self.image_creator), el.layers_html(self))
+        layers_html = []
+        for layer in el.layers:
+            layers_html.append(layer.accept(self))
+        return '<style>{}</style><div>{}</div>'.format(self.style_html(), ''.join(layers_html))
 
     def visit_AnimatedImageStack(self, el):
         return '<div data-layer="AnimatedImageStack">AnimatedImageStack not yet supported</div>'

@@ -1,6 +1,6 @@
-from imagestack import ImageStack
-from imagestack.layers import *
-from imagestack.colors import *
+from . import ImageStack
+from .layers import *
+from .colors import *
 import copy
 import ast
 

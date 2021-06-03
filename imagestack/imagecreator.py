@@ -1,4 +1,4 @@
-from imagestack.loaders import *
+from .loaders import *
 
 import asyncio
 import threading

@@ -1,5 +1,5 @@
 import numpy as np
-from imagestack.variables import VariableInterface
+from .variables import VariableInterface
 
 
 class ColorInterface:

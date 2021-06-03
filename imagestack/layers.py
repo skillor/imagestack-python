@@ -1,5 +1,5 @@
-from imagestack.variables import *
-from imagestack.colors import *
+from .variables import *
+from .colors import *
 
 import requests
 import cv2

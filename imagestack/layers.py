@@ -200,8 +200,8 @@ class TextLayer(ColoredLayer):
         return total_width, total_height, line_widths, line_heights, descent
 
     def lines_html(self):
-        line_template = '<p style="max-width:{}px;margin:0 0 {}px 0;text-overflow:ellipsis;' \
-                        'white-space:nowrap;overflow-x:clip;overflow-y:visible;line-height:{}px;">{{}}</p>'\
+        line_template = '<p style="max-width:{}px;margin:0 0 {}px 0;white-space:nowrap;' \
+                        'overflow-x:clip;overflow-y:visible;line-height:{}px;">{{}}</p>'\
             .format(self.max_size[0], self.line_margin, self.font_size)
         return '<div style="display:inline-block;text-align:{};{}">{}</div>'\
             .format(

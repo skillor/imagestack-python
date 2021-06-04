@@ -21,20 +21,9 @@ class AlignLayer(VariableKwargManager, Createable):
         self.max_size = self.get_kwarg('max_size', (-1, -1))
 
     def html_position_style(self):
-        pos_x = self.pos[0]
-        pos_y = self.pos[1]
-        if self.max_size[0] >= 0:
-            if self.align_x == 'center':
-                pos_x -= int(self.max_size[0] / 2)
-            elif self.align_x == 'right':
-                pos_x -= self.max_size[0]
-
-        if self.max_size[1] >= 0:
-            if self.align_y == 'center':
-                pos_y -= int(self.max_size[1] / 2)
-            elif self.align_y == 'bottom':
-                pos_y -= self.max_size[1]
-
+        rel_x, rel_y = html_relative_position(self.max_size, self.align_x, self.align_y)
+        pos_x = self.pos[0] + rel_x
+        pos_y = self.pos[1] + rel_y
         return 'position:absolute;overflow:clip;left:{}px;top:{}px;text-align:{};'.format(pos_x, pos_y, self.align_x)
 
     def html_style(self):
@@ -75,7 +64,7 @@ class ColorLayer(ColoredLayer):
         super()._init_finished()
 
     def html_style(self):
-        return super().html_style() + size_to_html(self.resize)
+        return super().html_style() + size_to_html(self.resize, self)
 
 
 class EmptyLayer(ColorLayer):
@@ -228,7 +217,7 @@ class TextLayer(ColoredLayer):
                 'font-size:{}px;' \
             .format(
                 self.html_position_style(),
-                size_to_html(self.max_size),
+                size_to_html(self.max_size, self),
                 self.font,
                 self.font_size
             )

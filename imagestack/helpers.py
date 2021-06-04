@@ -18,12 +18,45 @@ def rgb_to_bgr(rgb):
     return rgb[2], rgb[1], rgb[0]
 
 
-def size_to_html(size, prefix=''):
+def html_relative_position_x(width, align_x):
+    rel_x = 0
+    if width >= 0:
+        if align_x == 'center':
+            rel_x -= int(width / 2)
+        elif align_x == 'right':
+            rel_x -= width
+    return rel_x
+
+
+def html_relative_position_y(height, align_y):
+    rel_y = 0
+    if height >= 0:
+        if align_y == 'center':
+            rel_y -= int(height / 2)
+        elif align_y == 'bottom':
+            rel_y -= height
+    return rel_y
+
+
+def html_relative_position(size, align_x, align_y):
+    return html_relative_position_x(size[0], align_x), html_relative_position_y(size[1], align_y)
+
+
+def size_to_html(size, el, prefix='', relative=False):
+    width = '100%'
+    if size[0] >= 0:
+        if relative:
+            width = str(size[0] + html_relative_position_x(size[0], el.align_x)) + 'px'
+        else:
+            width = str(size[0]) + 'px'
+    height = '100%'
+    if size[1] >= 0:
+        if relative:
+            height = str(size[1] + html_relative_position_y(size[1], el.align_y)) + 'px'
+        else:
+            height = str(size[1]) + 'px'
     return '{}width:{};{}height:{};'\
-        .format(prefix,
-                str(size[0])+'px' if size[0] >= 0 else '100%',
-                prefix,
-                str(size[1])+'px' if size[1] >= 0 else '100%')
+        .format(prefix, width, prefix, height)
 
 
 def is_emoji(emoji):

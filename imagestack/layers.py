@@ -35,7 +35,7 @@ class AlignLayer(VariableKwargManager, Createable):
             elif self.align_y == 'bottom':
                 pos_y -= self.max_size[1]
 
-        return 'position:absolute;left:{}px;top:{}px;text-align:{};'.format(pos_x, pos_y, self.align_x)
+        return 'position:absolute;overflow:clip;left:{}px;top:{}px;text-align:{};'.format(pos_x, pos_y, self.align_x)
 
     def html_style(self):
         style = self.html_position_style()
@@ -75,7 +75,7 @@ class ColorLayer(ColoredLayer):
         super()._init_finished()
 
     def html_style(self):
-        return super().html_style() + 'width:{}px;height:{}px'.format(self.resize[0], self.resize[1])
+        return super().html_style() + size_to_html(self.resize)
 
 
 class EmptyLayer(ColorLayer):
@@ -209,8 +209,9 @@ class TextLayer(ColoredLayer):
         return total_width, total_height, line_widths, line_heights, descent
 
     def lines_html(self):
-        line_template = '<p style="margin:0 0 {}px 0; line-height:{}px;">{{}}</p>'\
-            .format(self.line_margin, self.font_size)
+        line_template = '<p style="max-width:{}px;margin:0 0 {}px 0;text-overflow:ellipsis;' \
+                        'white-space:nowrap;overflow-x:clip;overflow-y:visible;line-height:{}px;">{{}}</p>'\
+            .format(self.max_size[0], self.line_margin, self.font_size)
         return '<div style="display:inline-block;text-align:{};{}">{}</div>'\
             .format(
                 self.text_align,
@@ -220,14 +221,12 @@ class TextLayer(ColoredLayer):
 
     def html_style(self):
         style = '{}' \
-                'width:{}px;' \
-                'height:{}px;' \
+                '{}' \
                 'font-family:\'{}\';' \
                 'font-size:{}px;' \
             .format(
                 self.html_position_style(),
-                self.max_size[0],
-                self.max_size[1],
+                size_to_html(self.max_size),
                 self.font,
                 self.font_size
             )

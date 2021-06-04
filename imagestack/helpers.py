@@ -17,6 +17,14 @@ def rgb_to_bgr(rgb):
     return rgb[2], rgb[1], rgb[0]
 
 
+def size_to_html(size, prefix=''):
+    return '{}width:{};{}height:{};'\
+        .format(prefix,
+                str(size[0])+'px' if size[0] >= 0 else '100%',
+                prefix,
+                str(size[1])+'px' if size[1] >= 0 else '100%')
+
+
 def rotate_image(iimage, angle, bg_color=(0, 0, 0, 0), padding=False):
     if padding:
         diagonal_length = int(ceil(sqrt(iimage.shape[0] ** 2 + iimage.shape[1] ** 2)))

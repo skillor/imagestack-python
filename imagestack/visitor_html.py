@@ -1,4 +1,5 @@
 import base64
+from .helpers import size_to_html
 
 
 class VisitorHtml:
@@ -106,6 +107,7 @@ class VisitorHtml:
                                                 radius,
                                                 half_line_width,
                                                 el.size[1] - half_line_width - radius),
+
                     'L{},{}'.format(half_line_width, half_line_width + radius),
                     'A{},{} 0 0 1 {},{}'.format(radius,
                                                 radius,
@@ -114,18 +116,16 @@ class VisitorHtml:
 
         if el.radius >= 0:
             if el.line_width <= 0:
-                style = 'width:{}px;height:{}px;border-radius:{}px;border-style:solid;{}border-width:0px;{}'.format(
-                    el.size[0],
-                    el.size[1],
+                style = '{}border-radius:{}px;border-style:solid;{}border-width:0px;{}'.format(
+                    size_to_html(el.size),
                     max(0, abs(el.radius) - 0.05),
                     el.html_position_style(),
                     el.color.html_style_background(),
                 )
                 return '<div data-layer="RectangleLayer" style="{}"></div>'.format(style)
             else:
-                style = 'width:{}px;height:{}px;{}'.format(
-                    el.size[0],
-                    el.size[1],
+                style = '{}{}'.format(
+                    size_to_html(el.size),
                     el.html_position_style(),
                 )
                 inner_path = '<path d="{}" fill="none" stroke="url(#color)" stroke-width="{}"/>' \
@@ -138,9 +138,8 @@ class VisitorHtml:
                             el.color.svg_color_definition(),
                             inner_path)
         if el.line_width <= 0:
-            style = 'width:{}px;height:{}px;{}'.format(
-                el.size[0],
-                el.size[1],
+            style = '{}{}'.format(
+                size_to_html(el.size),
                 el.html_position_style(),
             )
             points = [
@@ -185,10 +184,9 @@ class VisitorHtml:
             for layer in el.template.layers:
                 layer_html.append(layer.accept(v2))
             html = ''.join(layer_html)
-            items_html.append('<div data-layer="Layer{}" style="position:relative;width:{}px;height:{}px;">{}</div>'
+            items_html.append('<div data-layer="Layer{}" style="position:relative;{}">{}</div>'
                               .format(i,
-                                      v2.max_size[0],
-                                      v2.max_size[1],
+                                      size_to_html(v2.max_size),
                                       html))
         return '<div data-layer="ListLayer" style="{}">{}</div>'\
             .format(el.html_position_style(),

@@ -136,6 +136,8 @@ class EmojiLayer(ImageLayer):
     def _init(self):
         super()._init()
         self.emoji = self.get_kwarg('emoji')
+        if not is_emoji(self.emoji):
+            self.emoji = '🆘'
         super()._init_finished()
 
     def html_style(self):

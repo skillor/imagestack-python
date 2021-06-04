@@ -138,6 +138,10 @@ class EmojiLayer(ImageLayer):
         self.emoji = self.get_kwarg('emoji')
         super()._init_finished()
 
+    def html_style(self):
+        return 'font-family: Segoe UI Emoji, Segoe UI Symbol, Symbola, Quivira;font-size:{}px;'\
+                   .format(max(0, self.resize[0], self.resize[1]) * 0.75) + self.html_position_style()
+
     def get_emoji_image_url(self, provider):
         r = requests.get(self.base_emoji_url + self.emoji)
         for x in r.text.split('data-src="')[1:]:

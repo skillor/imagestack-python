@@ -14,11 +14,17 @@ class ColorInterface:
 
 class SingleColor(ColorInterface, np.ndarray):
     def __new__(cls, color):
-        if len(color) == 1:
+        color = [max(0, min(255, x)) for x in color]
+        if len(color) == 0:
+            color = (0, 0, 0, 0)
+        elif len(color) == 1:
             color = (color[0], color[0], color[0], 255)
+        elif len(color) == 2:
+            color = (color[0], color[0], color[0], color[1])
         elif len(color) == 3:
             color = (color[2], color[1], color[0], 255)
-        color = [max(0, min(255, x)) for x in color]
+        elif len(color) >= 4:
+            color = (color[2], color[1], color[0], color[3])
         return np.array(color).view(cls)
 
     def get(self):

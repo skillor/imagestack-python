@@ -14,7 +14,7 @@ class VisitorHtml:
         if width > self.max_size[0]:
             self.max_size = (width, self.max_size[1])
         if height > self.max_size[1]:
-            self.max_size = (height, pos[1] + size[1])
+            self.max_size = (self.max_size[0], height)
 
     def style_html(self):
         style_html = []

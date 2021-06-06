@@ -49,7 +49,7 @@ class SingleColor(ColorInterface, np.ndarray):
         return '<linearGradient id="color"><stop stop-color="{}"/></linearGradient>'.format(self.html_color())
 
     def html_color(self):
-        return 'rgba({},{},{},{})'.format(*self.to_bgra())
+        return 'rgba({},{},{},{})'.format(self[2], self[1], self[0], self[3] / 255)
 
     def html_style_color(self):
         return 'color:{};'.format(self.html_color())

@@ -18,6 +18,15 @@ def rgb_to_bgr(rgb):
     return rgb[2], rgb[1], rgb[0]
 
 
+def normalize_angle(a):
+    a = int(a)
+    while a < 0:
+        a += 360
+    while a >= 360:
+        a -= 360
+    return a
+
+
 def html_relative_position_x(width, align_x):
     rel_x = 0
     if width >= 0:

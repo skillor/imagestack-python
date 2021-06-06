@@ -20,14 +20,14 @@ class AlignLayer(VariableKwargManager, Createable):
         self.align_y = self.get_kwarg('align_y', 'top')
         self.max_size = self.get_kwarg('max_size', (-1, -1))
 
-    def html_position_style(self):
-        rel_x, rel_y = html_relative_position(self.max_size, self.align_x, self.align_y)
+    def html_position_style(self, size):
+        rel_x, rel_y = html_relative_position(size, self.align_x, self.align_y)
         pos_x = self.pos[0] + rel_x
         pos_y = self.pos[1] + rel_y
         return 'position:absolute;overflow:clip;left:{}px;top:{}px;text-align:{};'.format(pos_x, pos_y, self.align_x)
 
     def html_style(self):
-        style = self.html_position_style()
+        style = self.html_position_style(self.max_size)
         if self.max_size[0] >= 0:
             style += 'max-width:{}px;'.format(self.max_size[0])
         if self.max_size[1] >= 0:
@@ -64,7 +64,9 @@ class ColorLayer(ColoredLayer):
         super()._init_finished()
 
     def html_style(self):
-        return super().html_style() + size_to_html(self.resize, self)
+        return self.html_position_style(self.resize) +\
+               self.color.html_style_background() +\
+               size_to_html(self.resize, self)
 
 
 class EmptyLayer(ColorLayer):
@@ -131,7 +133,7 @@ class EmojiLayer(ImageLayer):
 
     def html_style(self):
         return 'font-family: Segoe UI Emoji, Segoe UI Symbol, Symbola, Quivira;font-size:{}px;'\
-                   .format(max(0, self.resize[0], self.resize[1]) * 0.75) + self.html_position_style()
+                   .format(max(0, self.resize[0], self.resize[1]) * 0.75) + self.html_position_style(self.resize)
 
     def get_emoji_image_url(self, provider):
         r = requests.get(self.base_emoji_url + self.emoji)
@@ -216,7 +218,7 @@ class TextLayer(ColoredLayer):
                 'font-family:\'{}\';' \
                 'font-size:{}px;' \
             .format(
-                self.html_position_style(),
+                self.html_position_style(self.max_size),
                 size_to_html(self.max_size, self),
                 self.font,
                 self.font_size

@@ -63,6 +63,9 @@ class AnimatedImageStack(Createable, VariableKwargManager):
         self.seconds = self.get_kwarg('seconds', 5)
         self.fps = self.get_kwarg('fps', 5)
         self.rotation_func = self.get_kwarg('rotation_func', lambda i: self.get_kwarg('rotation', None) * i)
+        self.rotation_id = 'rotate-{}-{}-{}'.format(int(self.rotation_func(0.35)),
+                                                    int(self.rotation_func(0.62)),
+                                                    int(self.rotation_func(0.88)))
         self.loop = self.get_kwarg('loop', 1)
         self.bg_color = self.get_kwarg('bg_color', (0, 0, 0, 0))
         if len(self.bg_color) == 3:
@@ -97,3 +100,7 @@ class AnimatedImageStack(Createable, VariableKwargManager):
         is_success, last_image_bytes = cv2.imencode('.png', cv2.cvtColor(np.array(image_data[-1]), cv2.COLOR_RGBA2BGRA))
 
         return gif_image_bytes, io.BytesIO(last_image_bytes)
+
+    def create_html(self, image_creator):
+        v = VisitorHtml(image_creator)
+        return self.accept(v)

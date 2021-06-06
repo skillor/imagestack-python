@@ -1,5 +1,5 @@
 import base64
-from .helpers import size_to_html, html_relative_position
+from . import *
 
 
 class VisitorHtml:
@@ -29,14 +29,57 @@ class VisitorHtml:
         return ''.join(style_html)
 
     def visit_ImageStack(self, el):
+        return '<meta charset="UTF-8"><style>{}</style>{}'\
+            .format(self.style_html(), self.max_size[0], self.max_size[1], self.visit_RawImageStack(el))
+
+    def visit_RawImageStack(self, el):
         layers_html = []
         for layer in el.layers:
             layers_html.append(layer.accept(self))
-        return '<meta charset="UTF-8"><style>{}</style><div style="position:relative;width:{}px;height:{}px;">{}</div>'\
-            .format(self.style_html(), self.max_size[0], self.max_size[1], ''.join(layers_html))
+        return '<div data-layer="ImageStack" style="position:relative;width:{}px;height:{}px;">{}</div>'\
+            .format(self.max_size[0], self.max_size[1], ''.join(layers_html))
 
     def visit_AnimatedImageStack(self, el):
-        return '<div data-layer="AnimatedImageStack">AnimatedImageStack not yet supported</div>'
+        def _create_spin_keyframes():
+            keyframes = []
+            for i in list(np.arange(0, 1, 1 / (el.fps * el.seconds))) + [1]:
+                keyframes.append('{}% {{ transform: rotate({}deg); }}'
+                                 .format(i * 100, int(el.rotation_func(i))))
+            return keyframes
+
+        style = '@keyframes spin-{} {{ {} }} .{} {{ animation:  spin-{} {}s linear; animation-iteration-count: {}; }}'\
+            .format(el.rotation_id,
+                    ' '.join(_create_spin_keyframes()),
+                    el.rotation_id,
+                    el.rotation_id,
+                    el.seconds,
+                    ('infinite' if el.loop < 1 else el.loop))
+        return '<meta charset="UTF-8"><style>{}{}</style>{}'\
+            .format(self.style_html(), style, self.visit_RawAnimatedImageStack(el))
+
+    def visit_RawAnimatedImageStack(self, el):
+        bgimage = ''
+        if el.static_bg is not False:
+            el.static_bg._init()
+            bgimage = '<div data-layer="AnimatedImageBg" style="position:absolute;top:0px;left:0px;">{}</div>'\
+                .format(self.visit_RawImageStack(el.static_bg))
+
+        v2 = VisitorHtml(self.image_creator)
+        el.rotate._init()
+        rot_html = v2.visit_RawImageStack(el.rotate)
+        rimage = '<div data-layer="AnimatedImageRot" class="{}"' \
+                 ' style="position:absolute;top:0px;left:0px;width:{}px;height:{}px;">{}</div>'\
+            .format(el.rotation_id, v2.max_size[0], v2.max_size[1], rot_html)
+
+        fgimage = ''
+        if el.static_fg is not False:
+            el.static_fg._init()
+            fgimage = '<div data-layer="AnimatedImageFg" style="position:absolute;top:0px;left:0px;">{}</div>'\
+                .format(self.visit_RawImageStack(el.static_fg))
+
+        return '<div data-layer="AnimatedImageStack"' \
+               'style="position:relative;width:{}px;height:{}px;">{}{}{}</div>'\
+            .format(self.max_size[0], self.max_size[1], bgimage, rimage, fgimage)
 
     def visit_AlignLayer(self, el):
         self.check_set_max_size(el.pos, el.max_size, el)
@@ -122,14 +165,14 @@ class VisitorHtml:
                 style = '{}border-radius:{}px;border-style:solid;{}border-width:0px;{}'.format(
                     size_to_html(el.size, el),
                     max(0, abs(el.radius) - 0.05),
-                    el.html_position_style(),
+                    el.html_position_style(el.size),
                     el.color.html_style_background(),
                 )
                 return '<div data-layer="RectangleLayer" style="{}"></div>'.format(style)
             else:
                 style = '{}{}'.format(
                     size_to_html(el.size, el),
-                    el.html_position_style(),
+                    el.html_position_style(el.size),
                 )
                 inner_path = '<path d="{}" fill="none" stroke="url(#color)" stroke-width="{}"/>' \
                     .format(
@@ -143,7 +186,7 @@ class VisitorHtml:
         if el.line_width <= 0:
             style = '{}{}'.format(
                 size_to_html(el.size, el),
-                el.html_position_style(),
+                el.html_position_style(el.size),
             )
             points = [
                 'M-1,-1',
@@ -165,7 +208,7 @@ class VisitorHtml:
                '</div>' \
             .format(el.size[0],
                     el.size[1],
-                    el.html_position_style())
+                    el.html_position_style(el.size))
 
     def visit_LineLayer(self, el):
         self.check_set_max_size(el.pos, el.target, el)
@@ -175,8 +218,71 @@ class VisitorHtml:
         return '<div data-layer="ProgressLayer">{}</div>'.format(self.visit_RectangleLayer(el))
 
     def visit_PieLayer(self, el):
-        self.check_set_max_size(el.pos, (el.radius * 2, el.radius * 2), el)
-        return '<div data-layer="PieLayer"></div>'
+        angle_offset = 270
+
+        size = (el.radius * 2, el.radius * 2)
+        center = (el.radius, el.radius)
+
+        half_border_width = int(el.border_width * 0.5)
+
+        adjusted_radius = el.radius - half_border_width - 1
+
+        slices = len(el.choices)
+        slice_size = int(360 / slices)
+        half_slice_size = int(slice_size * 0.5)
+
+        self.check_set_max_size(el.pos, size, el)
+
+        def _create_svg_points():
+            points = []
+            for i in range(slices):
+                start = point_on_circle(angle=slice_size * i + angle_offset,
+                                        radius=adjusted_radius,
+                                        center=center)
+                points.append('M{},{}'.format(*start))
+                points.append('L{},{}'.format(*center))
+            return points
+        path = '<path d="{}" stroke="url(#color)" stroke-width="{}" />'.format(' '.join(_create_svg_points()),
+                                                                               el.line_width)
+        circle = '<circle cx="{}" cy="{}" r="{}"' \
+                 'stroke="url(#color)" fill="transparent" stroke-width="{}" />'.format(el.radius,
+                                                                                       el.radius,
+                                                                                       adjusted_radius,
+                                                                                       el.border_width)
+        svg = '<svg style="{}"><defs>{}</defs>{}{}</svg>'.format(size_to_html(size, el),
+                                                                 el.color.svg_color_definition(),
+                                                                 path,
+                                                                 circle)
+
+        choices_html = []
+        for i in range(slices):
+            c = point_on_circle(angle=slice_size * i + half_slice_size + angle_offset,
+                                radius=int(el.choices_radius),
+                                center=center)
+
+            el.choices[i]._init()
+            v2 = VisitorHtml(self.image_creator)
+            chtml = el.choices[i].accept(v2)
+            c_pos = (c[0] - int(v2.max_size[0] / 2), c[1] - int(v2.max_size[1] / 2))
+
+            rotate_style = ''
+            if el.rotate_choices:
+                rotate_style = 'transform:rotate({}deg);'.format(slice_size * i + half_slice_size)
+
+            choices_html.append('<div style="position:absolute;top:0px;left:0px;">'
+                                '<div style="position:absolute;left:{}px;top:{}px;width:{}px;height:{}px;{}">'
+                                '{}'
+                                '</div></div>'
+                                .format(c_pos[0],
+                                        c_pos[1],
+                                        v2.max_size[0],
+                                        v2.max_size[1],
+                                        rotate_style,
+                                        chtml))
+
+        return '<div data-layer="PieLayer" style="{}">{}{}</div>'.format(el.html_position_style(size),
+                                                                         svg,
+                                                                         ''.join(choices_html))
 
     def visit_ListLayer(self, el):
         items_html = []
@@ -192,5 +298,5 @@ class VisitorHtml:
                                       size_to_html(v2.max_size, el),
                                       html))
         return '<div data-layer="ListLayer" style="{}">{}</div>'\
-            .format(el.html_position_style(),
+            .format(el.html_position_style(el.max_size),
                     ''.join(items_html))

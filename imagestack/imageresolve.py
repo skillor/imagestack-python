@@ -242,6 +242,7 @@ class ImageStackParseVisitor:
 class ImageStackStringParser:
     ACCEPTED_CLASSES = {
         'ImageStack': ImageStack,
+        'AnimatedImageStack': AnimatedImageStack,
 
         'EmptyLayer': EmptyLayer,
         'ColorLayer': ColorLayer,

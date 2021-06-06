@@ -34,18 +34,10 @@ class VisitorCreate(Visitor):
             bgimage = el.static_bg.accept(self)
             bgimage = cv2.cvtColor(bgimage, cv2.COLOR_RGBA2BGRA)
 
-        def normalize_angle(a):
-            a = int(a)
-            while a < 0:
-                a += 360
-            while a >= 360:
-                a -= 360
-            return a
-
         buffered_images = {}
 
         image_data = []
-        for i in np.arange(0, 1, 1 / (el.fps * el.seconds)):
+        for i in list(np.arange(0, 1, 1 / (el.fps * el.seconds))) + [1]:
             angle = normalize_angle(el.rotation_func(i))
             hit = None
             if len(buffered_images) > 0:
@@ -270,6 +262,7 @@ class VisitorCreate(Visitor):
                                 radius=int(el.choices_radius),
                                 center=center)
 
+            el.choices[i]._init()
             cimg = el.choices[i].accept(self)
 
             if el.rotate_choices:

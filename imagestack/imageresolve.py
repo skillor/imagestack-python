@@ -258,6 +258,8 @@ class ImageStackStringParser:
         'SingleColor': SingleColor,
         'LinearGradientColor': LinearGradientColor,
 
+        'RotationLayer': RotationLayer,
+
         'Variable': Variable,
         'SingleColorVariable': SingleColorVariable,
         'FormattedVariables': FormattedVariables,

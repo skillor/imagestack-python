@@ -17,16 +17,14 @@ class ImageCreator:
                  emoji_path=None,
                  emoji_not_found_image=None,
                  download_emojis=False,
-                 save_downloaded_emojis=True,
+                 save_downloaded_emojis=False,
                  download_emoji_provider='microsoft'
                  ):
         self.font_loader = FontLoader(fonts)
 
+        self.save_downloaded_emojis = save_downloaded_emojis
         if emoji_path is None:
-            emoji_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                      '..',
-                                                      'images',
-                                                      'emojis'))
+            self.save_downloaded_emojis = False
         self.emoji_path = emoji_path
 
         if emoji_not_found_image is None:
@@ -34,7 +32,6 @@ class ImageCreator:
 
         self.emoji_not_found_image = emoji_not_found_image
         self.download_emojis = download_emojis
-        self.save_downloaded_emojis = save_downloaded_emojis
         self.download_emoji_provider = download_emoji_provider
 
         if load_memory is None:

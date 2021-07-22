@@ -57,26 +57,19 @@ class AnimatedImageStack(Createable, VariableKwargManager):
         return visitor.visit_AnimatedImageStack(self)
 
     def _init(self):
-        self.rotate = self.get_kwarg('rotate')
+        self.animated = self.get_kwarg('animated')
         self.static_fg = self.get_kwarg('static_fg', False)
         self.static_bg = self.get_kwarg('static_bg', False)
         self.seconds = self.get_kwarg('seconds', 5)
         self.fps = self.get_kwarg('fps', 5)
-        self.rotation_func = self.get_kwarg('rotation_func', lambda i: self.get_kwarg('rotation', None) * i)
-        self.rotation_id = 'rotate-{}-{}-{}'.format(int(self.rotation_func(0.35)),
-                                                    int(self.rotation_func(0.62)),
-                                                    int(self.rotation_func(0.88)))
         self.loop = self.get_kwarg('loop', 1)
-        self.bg_color = self.get_kwarg('bg_color', (0, 0, 0, 0))
-        if len(self.bg_color) == 3:
-            self.bg_color = self.bg_color[0], self.bg_color[1], self.bg_color[2], 255
 
     async def create(self, image_creator):
         v = VisitorCreate(image_creator)
         image_data = self.accept(v)
         return image_data
 
-    async def create_bytes(self, image_creator):
+    async def create_bytes(self, image_creator, max_size):
         image_data = await self.create(image_creator)
 
         gif_image_bytes = io.BytesIO()

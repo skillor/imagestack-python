@@ -95,6 +95,8 @@ def is_emoji(emoji):
 
 
 def rotate_image(iimage, angle, bg_color=(0, 0, 0, 0), padding=False):
+    if iimage is None:
+        return None
     if padding:
         diagonal_length = int(ceil(sqrt(iimage.shape[0] ** 2 + iimage.shape[1] ** 2)))
         image = np.zeros((diagonal_length, diagonal_length, iimage.shape[2]), dtype=np.uint8)

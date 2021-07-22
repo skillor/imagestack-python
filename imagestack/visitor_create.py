@@ -21,39 +21,30 @@ class VisitorCreate(Visitor):
         return img
 
     def visit_AnimatedImageStack(self, el):
-        rimage = el.rotate.accept(self)
-        rimage = cv2.cvtColor(rimage, cv2.COLOR_RGBA2BGRA)
+        el.animated._init()
+        el.animated.create_init(self)
 
         fgimage = None
         if el.static_fg is not False:
-            fgimage = el.static_fg.accept(self)
+            el.static_fg._init()
+            fgimage = self.visit_ImageStack(el.static_fg)
             fgimage = cv2.cvtColor(fgimage, cv2.COLOR_RGBA2BGRA)
 
         bgimage = None
         if el.static_bg is not False:
-            bgimage = el.static_bg.accept(self)
+            el.static_bg._init()
+            bgimage = self.visit_ImageStack(el.static_bg)
             bgimage = cv2.cvtColor(bgimage, cv2.COLOR_RGBA2BGRA)
-
-        buffered_images = {}
 
         image_data = []
         for i in list(np.arange(0, 1, 1 / (el.fps * el.seconds))) + [1]:
-            angle = normalize_angle(el.rotation_func(i))
-            hit = None
-            if len(buffered_images) > 0:
-                hit = min(buffered_images.keys(), key=lambda x: abs(x - angle))
-            if hit is not None and abs(angle - hit) <= 1:
-                image_data.append(buffered_images[hit])
-            else:
-                t = rotate_image(rimage, angle, bg_color=el.bg_color)
-                t = overlay(bgimage, t)
-                t = overlay(t, fgimage)
+            t = el.animated.create_progress(i)
+            t = overlay(bgimage, t)
+            t = overlay(t, fgimage)
 
-                t = Image.fromarray(t)
+            t = Image.fromarray(t)
 
-                buffered_images[angle] = t
-
-                image_data.append(t)
+            image_data.append(t)
 
         return image_data
 
@@ -85,6 +76,8 @@ class VisitorCreate(Visitor):
     def visit_WebImageLayer(self, el):
         img_bytes = requests.get(el.url).content
         img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
+        if img is None:
+            return None
         img = el.validated(img)
         return el.resized(img)
 
@@ -265,12 +258,13 @@ class VisitorCreate(Visitor):
             el.choices[i]._init()
             cimg = el.choices[i].accept(self)
 
-            if el.rotate_choices:
-                cimg = rotate_image(cimg, angle=-(slice_size * i + half_slice_size), padding=True)
+            if cimg is not None:
+                if el.rotate_choices:
+                    cimg = rotate_image(cimg, angle=-(slice_size * i + half_slice_size), padding=True)
 
-            ho1, wo1 = int(cimg.shape[0] * 0.5), int(cimg.shape[1] * 0.5)
-            ho2, wo2 = cimg.shape[0] - ho1, cimg.shape[1] - wo1
-            img[c[1] - ho1:c[1] + ho2, c[0] - wo1:c[0] + wo2] = cimg
+                ho1, wo1 = int(cimg.shape[0] * 0.5), int(cimg.shape[1] * 0.5)
+                ho2, wo2 = cimg.shape[0] - ho1, cimg.shape[1] - wo1
+                img[c[1] - ho1:c[1] + ho2, c[0] - wo1:c[0] + wo2] = cimg
 
         return img
 

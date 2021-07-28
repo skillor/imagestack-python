@@ -123,6 +123,12 @@ class ImageStackAnalyser(ast.NodeVisitor):
     def visit_Constant(self, node):
         self.incremental_visit(node, value=node.value, itype=Node.CONSTANT)
 
+    def visit_Num(self, node):
+        self.incremental_visit(node, value=node.n, itype=Node.CONSTANT)
+
+    def visit_Str(self, node):
+        self.incremental_visit(node, value=node.s, itype=Node.CONSTANT)
+
     def visit_UnaryOp(self, node):
         self.incremental_visit(node, value=type(node.op).__name__, itype=Node.UNARY_OP)
 

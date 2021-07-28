@@ -84,9 +84,11 @@ class VisitorCreate(Visitor):
     def visit_EmojiLayer(self, el):
         emoji_id = from_char(el.emoji)
 
-        file = os.path.join(self.image_creator.emoji_path, emoji_id + '.png')
+        file = None
+        if self.image_creator.emoji_path is not None:
+            file = os.path.join(self.image_creator.emoji_path, emoji_id + '.png')
         img = None
-        if os.path.exists(file):
+        if file is not None and os.path.exists(file):
             img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
         elif self.image_creator.download_emojis:
             url = el.get_emoji_image_url(self.image_creator.download_emoji_provider)

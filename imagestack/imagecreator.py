@@ -27,7 +27,7 @@ class ImageCreator:
             self.save_downloaded_emojis = False
         self.emoji_path = emoji_path
 
-        if emoji_not_found_image is None:
+        if emoji_not_found_image is None and emoji_path is not None:
             emoji_not_found_image = os.path.join(emoji_path, '0.png')
 
         self.emoji_not_found_image = emoji_not_found_image

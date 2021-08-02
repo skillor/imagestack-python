@@ -31,13 +31,13 @@ class SingleColor(ColorInterface, np.ndarray):
         return self
 
     def lightened(self, factor):
-        return SingleColor([self[0] * factor, self[1] * factor, self[2] * factor, self[3]])
+        return SingleColor([self[2] * factor, self[1] * factor, self[0] * factor, self[3]])
 
     def darkened(self, factor):
         return self.lightened(1 - factor)
 
     def alpha(self, alpha):
-        return SingleColor([self[0], self[1], self[2], alpha])
+        return SingleColor([self[2], self[1], self[0], alpha])
 
     def to_bgra(self):
         return SingleColor([self[2], self[1], self[0], self[3]])

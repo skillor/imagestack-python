@@ -53,6 +53,7 @@ class ImageCreator:
         class _CreateImage:
             def __init__(_self, event):
                 _self.result = None
+                _self.error = None
                 _self.event = event
 
             def create(_self):
@@ -60,7 +61,10 @@ class ImageCreator:
                 loop.run_until_complete(_self._async_create())
 
             async def _async_create(_self):
-                _self.result = await stack.create_bytes(image_creator=self, max_size=max_size)
+                try:
+                    _self.result = await stack.create_bytes(image_creator=self, max_size=max_size)
+                except Exception as err:
+                    _self.error = err
                 _self.event.set()
 
         e = AsyncEvent()
@@ -68,6 +72,8 @@ class ImageCreator:
 
         threading.Thread(target=ci.create).start()
         await e.wait()
+        if ci.error is not None:
+            raise ci.error
 
         return ci.result
 

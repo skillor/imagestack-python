@@ -1,5 +1,16 @@
 from . import *
 import warnings
+from string import Formatter
+
+
+class SafeFormatter(Formatter):
+    def get_field(self, field_name, args, kwargs):
+        if not field_name.isdigit():
+            raise Exception('Invalid format string')
+        return super().get_field(field_name, args, kwargs)
+
+
+safe_formatter = SafeFormatter()
 
 
 class VariableInterface:
@@ -66,7 +77,7 @@ class Variable(VariableInterface):
         return v
 
     def formatted(self, s):
-        self.add_after_operation(lambda x: s.format(x))
+        self.add_after_operation(lambda x: safe_formatter.format(s, x))
         return self
 
     # TO-DO: implement all necessary requests
@@ -178,7 +189,7 @@ class FormattedVariables(VariableInterface):
             var.set(value)
 
     def get(self):
-        return self.vformat.format(*[v.get() for v in self.vars])
+        return safe_formatter.format(self.vformat, *[v.get() for v in self.vars])
 
 
 class VariableKwargManager:

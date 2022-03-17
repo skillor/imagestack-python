@@ -74,8 +74,11 @@ class VisitorCreate(Visitor):
         return el.resized(img)
 
     def visit_WebImageLayer(self, el):
-        img_bytes = requests.get(el.url).content
-        img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
+        try:
+            img_bytes = requests.get(el.url).content
+            img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
+        except:
+            return None
         if img is None:
             return None
         img = el.validated(img)

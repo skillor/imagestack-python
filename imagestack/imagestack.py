@@ -49,7 +49,11 @@ class ImageStack(Createable, VariableKwargManager):
 
     def create_html(self, image_creator):
         v = VisitorHtml(image_creator)
-        return self.accept(v)
+        return v.visit_ImageStack(self)
+
+    def create_raw_html(self, image_creator):
+        v = VisitorHtml(image_creator)
+        return v.visit_RawImageStack(self)
 
 
 class AnimatedImageStack(Createable, VariableKwargManager):

@@ -79,3 +79,6 @@ class ImageCreator:
 
     def create_html(self, stack):
         return stack.create_html(image_creator=self)
+
+    def create_raw_html(self, stack):
+        return stack.create_raw_html(image_creator=self)

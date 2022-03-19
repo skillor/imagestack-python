@@ -30,7 +30,7 @@ class VisitorHtml:
 
     def visit_ImageStack(self, el):
         return '<meta charset="UTF-8"><style>{}</style>{}'\
-            .format(self.style_html(), self.max_size[0], self.max_size[1], self.visit_RawImageStack(el))
+            .format(self.style_html(), self.visit_RawImageStack(el))
 
     def visit_RawImageStack(self, el):
         layers_html = []

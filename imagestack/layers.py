@@ -169,7 +169,6 @@ class TextLayer(ColoredLayer):
         self.text_lines = self.get_kwarg('text_lines', False)
         if self.text_lines is False:
             text = self.get_kwarg('text')
-            text = unicodedata.normalize('NFKC', str(text))
             self.wrap_limit = self.get_kwarg('wrap_limit', -1)
 
             if self.wrap_limit > 0:
@@ -199,7 +198,7 @@ class TextLayer(ColoredLayer):
 
         total_width = max(line_widths)
 
-        return total_width, total_height, line_widths, line_heights, descent
+        return total_width, total_height, line_widths, line_heights, descent - 1
 
     def lines_html(self):
         line_template = '<p style="max-width:{}px;margin:0 0 {}px 0;white-space:nowrap;' \
@@ -211,6 +210,12 @@ class TextLayer(ColoredLayer):
                 self.color.html_style_color(),
                 ''.join(map(line_template.format, self.text_lines))
             )
+
+    def html_position_style(self, size):
+        rel_x, rel_y = html_relative_position(size, self.align_x, self.align_y)
+        pos_x = self.pos[0] + rel_x
+        pos_y = self.pos[1] + rel_y - 2
+        return 'position:absolute;overflow:clip;left:{}px;top:{}px;text-align:{};'.format(pos_x, pos_y, self.align_x)
 
     def html_style(self):
         style = '{}' \

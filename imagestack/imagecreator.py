@@ -52,8 +52,9 @@ class ImageCreator:
         emojis = []
         for e in os.listdir(self.emoji_path):
             try:
-                is_emoji(to_char(e))
-                emojis.append(os.path.splitext(e)[0])
+                emoji = from_char(os.path.splitext(e)[0])
+                is_emoji(emoji)
+                emojis.append({'emoji': emoji, 'path': e})
             except:
                 pass
         return emojis

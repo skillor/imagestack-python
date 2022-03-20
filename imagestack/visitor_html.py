@@ -22,7 +22,7 @@ class VisitorHtml:
             with open(font_path, "rb") as font_file:
                 base64_font = base64.b64encode(font_file.read()).decode('ascii')
             style_html.append('@font-face {{'
-                              'font-family:\'{}\';'
+                              'font-family:\'imagestack-{}\';'
                               'src:url(data:application/x-font-woff;charset=utf-8;base64,{}) format(\'woff\');'
                               '}}'
                               .format(key, base64_font))

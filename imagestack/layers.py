@@ -160,6 +160,7 @@ class TextLayer(ColoredLayer):
     def _init(self):
         super()._init()
         self.font = self.get_kwarg('font', 'default')
+        self.html_font = f"imagestack-{self.font}"
         self.font_size = self.get_kwarg('font_size', 16)
 
         self.line_margin = self.get_kwarg('line_margin', 0)
@@ -225,7 +226,7 @@ class TextLayer(ColoredLayer):
             .format(
                 self.html_position_style(self.max_size),
                 size_to_html(self.max_size, self),
-                self.font,
+                self.html_font,
                 self.font_size
             )
         return style

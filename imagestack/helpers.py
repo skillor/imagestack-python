@@ -11,7 +11,11 @@ LINE_TYPE = cv2.LINE_AA
 
 
 def from_char(c):
-    return ''.join(['{:x}'.format(x) for x in c.encode('utf-8')])
+    return c.encode('utf-8').hex()
+
+
+def to_char(c):
+    return bytes.fromhex(c).decode('utf-8')
 
 
 def rgb_to_bgr(rgb):

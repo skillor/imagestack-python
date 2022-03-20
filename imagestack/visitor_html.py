@@ -114,6 +114,9 @@ class VisitorHtml:
             .format(el.html_style(), el.html_image(el.url))
 
     def visit_EmojiLayer(self, el):
+        emoji = el.emoji
+        if emoji is None:
+            emoji = self.image_creator.emoji_fallback
         self.check_set_max_size(el.pos, el.resize, el)
         return '<div data-layer="EmojiLayer" style="{}">{}</div>' \
             .format(el.html_style(), el.emoji)

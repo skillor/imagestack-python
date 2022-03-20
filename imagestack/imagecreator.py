@@ -3,6 +3,8 @@ import os
 import asyncio
 import threading
 
+from . import to_char
+
 
 class AsyncEvent(asyncio.Event):
     def set(self):
@@ -15,7 +17,7 @@ class ImageCreator:
                  fonts=None,
                  load_memory=None,
                  emoji_path=None,
-                 emoji_not_found_image=None,
+                 emoji_fallback='🆘',
                  download_emojis=False,
                  save_downloaded_emojis=False,
                  download_emoji_provider='microsoft'
@@ -27,10 +29,8 @@ class ImageCreator:
             self.save_downloaded_emojis = False
         self.emoji_path = emoji_path
 
-        if emoji_not_found_image is None and emoji_path is not None:
-            emoji_not_found_image = os.path.join(emoji_path, '0.png')
+        self.emoji_fallback = emoji_fallback
 
-        self.emoji_not_found_image = emoji_not_found_image
         self.download_emojis = download_emojis
         self.download_emoji_provider = download_emoji_provider
 
@@ -45,6 +45,11 @@ class ImageCreator:
         if name in self.image_memory:
             raise Exception('image with same name was loaded before! Use a prefix')
         self.image_memory[name] = img
+
+    def get_downloaded_emojis(self):
+        if not self.save_downloaded_emojis:
+            return []
+        return [is_emoji(to_char(e)) for e in os.listdir(self.emoji_path)]
 
     async def create(self, stack, max_size=(-1, -1)):
         if stack is None:

@@ -85,8 +85,10 @@ class VisitorCreate(Visitor):
         return el.resized(img)
 
     def visit_EmojiLayer(self, el):
-        emoji_id = from_char(el.emoji)
-
+        if el.emoji is None:
+            emoji_id = from_char(self.image_creator.emoji_fallback)
+        else:
+            emoji_id = from_char(el.emoji)
         file = None
         if self.image_creator.emoji_path is not None:
             file = os.path.join(self.image_creator.emoji_path, emoji_id + '.png')
@@ -102,13 +104,6 @@ class VisitorCreate(Visitor):
                 img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
                 if self.image_creator.save_downloaded_emojis:
                     cv2.imwrite(file, img)
-
-        if img is None:
-            if self.image_creator.emoji_not_found_image is not None and \
-                    os.path.exists(self.image_creator.emoji_not_found_image):
-                img = cv2.imread(self.image_creator.emoji_not_found_image, cv2.IMREAD_UNCHANGED)
-            else:
-                return None
 
         img = el.validated(img)
         return el.resized(img)

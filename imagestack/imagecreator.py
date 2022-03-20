@@ -49,7 +49,14 @@ class ImageCreator:
     def get_downloaded_emojis(self):
         if not self.save_downloaded_emojis:
             return []
-        return [is_emoji(to_char(e)) for e in os.listdir(self.emoji_path)]
+        emojis = []
+        for e in os.listdir(self.emoji_path):
+            try:
+                is_emoji(to_char(e))
+                emojis.append(os.path.splitext(e)[0])
+            except:
+                pass
+        return emojis
 
     async def create(self, stack, max_size=(-1, -1)):
         if stack is None:

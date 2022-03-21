@@ -134,20 +134,19 @@ class VisitorCreate(Visitor):
 
         img = el.colored(np.array(img))
 
-        if el.background_color:
-            bg_max_size_x = total_width + (el.background_padding[0] * 2)
-            bg_max_size_y = total_height + (el.background_padding[1] * 2)
-            bg_layer = RectangleLayer(color=el.background_color,
-                                      size=(bg_max_size_x, bg_max_size_y),
-                                      radius=el.border_radius)
-            bg_layer._init()
-            bg_img = bg_layer.accept(self)
+        bg_max_size_x = total_width + (el.background_padding[0] * 2)
+        bg_max_size_y = total_height + (el.background_padding[1] * 2)
+        bg_layer = RectangleLayer(color=el.background_color,
+                                  size=(bg_max_size_x, bg_max_size_y),
+                                  radius=el.border_radius)
+        bg_layer._init()
+        bg_img = bg_layer.accept(self)
 
-            img = overlay(bg_img, img,
-                          x=int(bg_max_size_x / 2), y=int(bg_max_size_y / 2) + 1,
-                          align_x='center', align_y='center',
-                          max_size=(bg_max_size_x, bg_max_size_y)
-                          )
+        img = overlay(bg_img, img,
+                      x=int(bg_max_size_x / 2), y=int(bg_max_size_y / 2) + 1,
+                      align_x='center', align_y='center',
+                      max_size=(bg_max_size_x, bg_max_size_y)
+                      )
         return img
 
     def visit_LineLayer(self, el):

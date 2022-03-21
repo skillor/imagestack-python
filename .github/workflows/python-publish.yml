@@ -12,6 +12,10 @@ on:
   release:
     types: [published]
 
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
 
@@ -35,3 +39,9 @@ jobs:
     - name: Publish package
       run: |
         python -m twine upload "dist/*" -u "__token__" -p ${{ secrets.PYPI_API_TOKEN }}
+    - name: Commit version bumped setup.py
+      run: |
+        git config --global user.email "skillor@gmx.de"
+        git config --global user.name "Release Runner"
+        git add --force ./setup.py
+        git diff-index --quiet HEAD || git commit -am "Bump release version" && git push

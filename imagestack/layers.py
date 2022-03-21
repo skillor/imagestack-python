@@ -161,9 +161,7 @@ class TextLayer(ColoredLayer):
         super()._init()
         self.font = self.get_kwarg('font', 'default')
 
-        self.background_color = self.get_kwarg('background_color', False)
-        if self.background_color and not isinstance(self.background_color, LinearGradientColor):
-            self.background_color = SingleColor(self.background_color)
+        self.background_color = ColorInterface.validated(self.get_kwarg('background_color', (0, 0, 0, 0)))
         self.background_padding = self.get_kwarg('background_padding', (0, 0))
         self.border_radius = self.get_kwarg('border_radius', 0)
 

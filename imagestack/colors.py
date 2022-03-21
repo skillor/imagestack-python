@@ -57,6 +57,9 @@ class SingleColor(ColorInterface, np.ndarray):
     def html_style_background(self):
         return 'background-color:{};'.format(self.html_color())
 
+    def is_fully_transparent(self):
+        return self[3] == 0
+
 
 class LinearGradientColor(ColorInterface):
     def __init__(self, color1, color2, axis=0):
@@ -111,3 +114,6 @@ class LinearGradientColor(ColorInterface):
 
     def html_style_background(self):
         return 'background-image:{};'.format(self.html_color())
+
+    def is_fully_transparent(self):
+        return self.color1.is_fully_transparent() and self.color1.is_fully_transparent()

@@ -29,14 +29,14 @@ class VisitorHtml:
         return ''.join(style_html)
 
     def visit_ImageStack(self, el):
-        return '<meta charset="UTF-8"><style>{}</style>{}'\
+        return '<meta charset="UTF-8"><style>{}</style>{}' \
             .format(self.style_html(), self.visit_RawImageStack(el))
 
     def visit_RawImageStack(self, el):
         layers_html = []
         for layer in el.layers:
             layers_html.append(layer.accept(self))
-        return '<div data-layer="ImageStack" style="position:relative;width:{}px;height:{}px;">{}</div>'\
+        return '<div data-layer="ImageStack" style="position:relative;width:{}px;height:{}px;">{}</div>' \
             .format(self.max_size[0], self.max_size[1], ''.join(layers_html))
 
     def visit_AnimatedImageStack(self, el):
@@ -47,38 +47,38 @@ class VisitorHtml:
                                  .format(i * 100, int(el.rotation_func(i))))
             return keyframes
 
-        style = '@keyframes spin-{} {{ {} }} .{} {{ animation:  spin-{} {}s linear; animation-iteration-count: {}; }}'\
+        style = '@keyframes spin-{} {{ {} }} .{} {{ animation:  spin-{} {}s linear; animation-iteration-count: {}; }}' \
             .format(el.rotation_id,
                     ' '.join(_create_spin_keyframes()),
                     el.rotation_id,
                     el.rotation_id,
                     el.seconds,
                     ('infinite' if el.loop < 1 else el.loop))
-        return '<meta charset="UTF-8"><style>{}{}</style>{}'\
+        return '<meta charset="UTF-8"><style>{}{}</style>{}' \
             .format(self.style_html(), style, self.visit_RawAnimatedImageStack(el))
 
     def visit_RawAnimatedImageStack(self, el):
         bgimage = ''
         if el.static_bg is not False:
             el.static_bg._init()
-            bgimage = '<div data-layer="AnimatedImageBg" style="position:absolute;top:0px;left:0px;">{}</div>'\
+            bgimage = '<div data-layer="AnimatedImageBg" style="position:absolute;top:0px;left:0px;">{}</div>' \
                 .format(self.visit_RawImageStack(el.static_bg))
 
         v2 = VisitorHtml(self.image_creator)
         el.rotate._init()
         rot_html = v2.visit_RawImageStack(el.rotate)
         rimage = '<div data-layer="AnimatedImageRot" class="{}"' \
-                 ' style="position:absolute;top:0px;left:0px;width:{}px;height:{}px;">{}</div>'\
+                 ' style="position:absolute;top:0px;left:0px;width:{}px;height:{}px;">{}</div>' \
             .format(el.rotation_id, v2.max_size[0], v2.max_size[1], rot_html)
 
         fgimage = ''
         if el.static_fg is not False:
             el.static_fg._init()
-            fgimage = '<div data-layer="AnimatedImageFg" style="position:absolute;top:0px;left:0px;">{}</div>'\
+            fgimage = '<div data-layer="AnimatedImageFg" style="position:absolute;top:0px;left:0px;">{}</div>' \
                 .format(self.visit_RawImageStack(el.static_fg))
 
         return '<div data-layer="AnimatedImageStack"' \
-               'style="position:relative;width:{}px;height:{}px;">{}{}{}</div>'\
+               'style="position:relative;width:{}px;height:{}px;">{}{}{}</div>' \
             .format(self.max_size[0], self.max_size[1], bgimage, rimage, fgimage)
 
     def visit_AlignLayer(self, el):
@@ -132,17 +132,17 @@ class VisitorHtml:
             inner_style += 'align-items:center;'
         elif el.align_y == 'bottom':
             inner_style += 'align-items:flex-end;'
-        background_div = '{}'
-        if el.background_color:
-            background_div = '<div style="width:fit-content;height:fit-content;' \
-                             'border-radius:{}px;padding:{}px {}px;{}">{{}}</div>'.format(
-                el.border_radius, el.background_padding[1], el.background_padding[0],
-                el.background_color.html_style_background())
+
+        background_div = '<div style="width:fit-content;height:fit-content;' \
+                         'border-radius:{}px;padding:{}px {}px;{}">{}</div>'.format(
+            el.border_radius, el.background_padding[1], el.background_padding[0],
+            el.background_color.html_style_background(), el.lines_html())
         return '<div data-layer="TextLayer" style="{}"><div style="{}">{}</div></div>' \
-            .format(el.html_style(), inner_style, background_div.format(el.lines_html()))
+            .format(el.html_style(), inner_style, background_div)
 
     def visit_RectangleLayer(self, el):
         self.check_set_max_size(el.pos, el.size, el)
+
         def _create_svg_points():
             half_line_width = int(el.line_width / 2)
             radius = abs(el.radius)
@@ -185,9 +185,9 @@ class VisitorHtml:
                 )
                 inner_path = '<path d="{}" fill="none" stroke="url(#color)" stroke-width="{}"/>' \
                     .format(
-                        ' '.join(_create_svg_points()),
-                        el.line_width,
-                    )
+                    ' '.join(_create_svg_points()),
+                    el.line_width,
+                )
                 return '<div data-layer="RectangleLayer"><svg style="{}"><defs>{}</defs>{}</svg></div>' \
                     .format(style,
                             el.color.svg_color_definition(),
@@ -206,9 +206,9 @@ class VisitorHtml:
             ]
             inner_path = '<path d="{}" fill-rule="evenodd" fill="url(#color)" stroke="none"/>' \
                 .format(
-                    ' '.join(points + _create_svg_points()),
-                )
-            return '<div data-layer="RectangleLayer"><svg style="{}"><defs>{}</defs>{}</svg></div>'\
+                ' '.join(points + _create_svg_points()),
+            )
+            return '<div data-layer="RectangleLayer"><svg style="{}"><defs>{}</defs>{}</svg></div>' \
                 .format(style,
                         el.color.svg_color_definition(),
                         inner_path)
@@ -251,6 +251,7 @@ class VisitorHtml:
                 points.append('M{},{}'.format(*start))
                 points.append('L{},{}'.format(*center))
             return points
+
         path = '<path d="{}" stroke="url(#color)" stroke-width="{}" />'.format(' '.join(_create_svg_points()),
                                                                                el.line_width)
         circle = '<circle cx="{}" cy="{}" r="{}"' \
@@ -306,6 +307,6 @@ class VisitorHtml:
                               .format(i,
                                       size_to_html(v2.max_size, el),
                                       html))
-        return '<div data-layer="ListLayer" style="{}">{}</div>'\
+        return '<div data-layer="ListLayer" style="{}">{}</div>' \
             .format(el.html_position_style(el.max_size),
                     ''.join(items_html))

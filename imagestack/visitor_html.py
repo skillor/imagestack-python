@@ -132,8 +132,14 @@ class VisitorHtml:
             inner_style += 'align-items:center;'
         elif el.align_y == 'bottom':
             inner_style += 'align-items:flex-end;'
+        background_div = '{}'
+        if el.background_color:
+            background_div = '<div style="width:fit-content;height:fit-content;' \
+                             'border-radius:{}px;padding:{}px {}px;{}">{{}}</div>'.format(
+                el.border_radius, el.background_padding[1], el.background_padding[0],
+                el.background_color.html_style_background())
         return '<div data-layer="TextLayer" style="{}"><div style="{}">{}</div></div>' \
-            .format(el.html_style(), inner_style, el.lines_html())
+            .format(el.html_style(), inner_style, background_div.format(el.lines_html()))
 
     def visit_RectangleLayer(self, el):
         self.check_set_max_size(el.pos, el.size, el)

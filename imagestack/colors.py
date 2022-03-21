@@ -102,15 +102,12 @@ class LinearGradientColor(ColorInterface):
                                                     )
 
     def html_style_color(self):
-        return 'background-color:{};' \
-               'background-image:{};' \
+        return 'background-image:{};' \
                'background-size:100%;' \
                '-webkit-background-clip:text;' \
                '-moz-background-clip:text;' \
                '-webkit-text-fill-color:transparent;' \
-               '-moz-text-fill-color:transparent;'.format(self.color1.html_color(),
-                                                          self.html_color()
-                                                          )
+               '-moz-text-fill-color:transparent;'.format(self.html_color())
 
     def html_style_background(self):
         return 'background-image:{};'.format(self.html_color())

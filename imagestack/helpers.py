@@ -136,8 +136,7 @@ def rotate_image(iimage, angle, bg_color=(0, 0, 0, 0), padding=False):
 def overlay_matching(background, foreground):
     fg_image = Image.fromarray(foreground)
     bg_image = Image.fromarray(background)
-    bg_image.paste(fg_image, (0, 0), fg_image)
-    return np.array(bg_image)
+    return np.array(Image.alpha_composite(bg_image, fg_image))
 
 
 def point_on_circle(angle=0, radius=1, center=(0, 0)):

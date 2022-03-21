@@ -28,6 +28,8 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade --no-cache-dir -r requirements.txt
         python -m pip install --upgrade --no-cache-dir --prefer-binary twine
+    - name: Bump setup version
+      run: python setup_create.py ${{ github.event.release.tag_name }}
     - name: Build wheel
       run: python setup.py sdist bdist_wheel
     - name: Publish package

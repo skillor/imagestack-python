@@ -45,4 +45,6 @@ jobs:
         git config --global user.email "skillor@gmx.de"
         git config --global user.name "Release Runner"
         git add --force ./setup.py
-        git diff-index --quiet HEAD || git commit -am "Bump release version" && git tag -fa ${{ github.event.release.tag_name }} && git push origin HEAD:master --tags
+        git commit -am "Bump release version"
+        git tag -fa ${{ github.event.release.tag_name }} -m "Bump to version ${{ github.event.release.tag_name }}"
+        git push origin HEAD:master --tags

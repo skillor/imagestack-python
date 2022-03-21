@@ -41,7 +41,6 @@ jobs:
         python -m twine upload "dist/*" -u "__token__" -p ${{ secrets.PYPI_API_TOKEN }}
     - name: Commit version bumped setup.py
       run: |
-        git push origin :refs/tags/${{ github.event.release.tag_name }}
         git config --global user.email "skillor@gmx.de"
         git config --global user.name "Release Runner"
         git add --force ./setup.py

@@ -46,4 +46,4 @@ jobs:
         git add --force ./setup.py
         git commit -am "Bump release version"
         git tag -fa ${{ github.event.release.tag_name }} -m "Bump to version ${{ github.event.release.tag_name }}"
-        git push origin HEAD:master --tags
+        git push origin HEAD:master --tags --force

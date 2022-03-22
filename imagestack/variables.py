@@ -29,7 +29,7 @@ class VariableInterface:
         if issubclass(type(key), VariableInterface):
             key.set(value)
             return key.get()
-        if isinstance(key, str) and hasattr(value, key):
+        if isinstance(key, str) and not key.startswith('_') and hasattr(value, key):
             return getattr(value, key)
         return value[key]
 

@@ -83,17 +83,21 @@ class LinearGradientColor(ColorInterface):
 
         return color_gradient
 
-    def svg_color_definition(self):
+    def svg_color_definition_with_id(self, color_id):
         gradient_transform = ''
         if self.direction_axis == 0:
             gradient_transform = ' gradientTransform="rotate(90)"'
-        return '<linearGradient id="color"{}>' \
+        return '<linearGradient id="{}"{}>' \
                '<stop offset="0%" style="stop-color:{};"/>' \
                '<stop offset="100%" style="stop-color:{};"/>' \
-               '</linearGradient>'.format(gradient_transform,
+               '</linearGradient>'.format(color_id,
+                                          gradient_transform,
                                           self.color1.html_color(),
                                           self.color2.html_color(),
                                           )
+
+    def svg_color_definition(self):
+        return self.svg_color_definition_with_id('color')
 
     def html_color(self):
         direction = 'to right'

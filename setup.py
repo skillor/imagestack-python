@@ -10,7 +10,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(name='ImageStack',
       packages=['imagestack'],
-      version='0.1.23',
+      version='0.1.24',
       description='Create Images by Stacking them',
       author='skillor',
       author_email='skillor@gmx.net',
